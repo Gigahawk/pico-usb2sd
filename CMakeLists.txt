@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
-set(PROJECT pic-usb2sd)
+set(PROJECT pico-usb2sd)
 set(PICO_PIO_USB_DIR ${CMAKE_CURRENT_LIST_DIR}/Pico-PIO-USB)
+set(PICO_LIBSDEMU_DIR ${CMAKE_CURRENT_LIST_DIR}/pico-libsdemu)
 set(PICO_BOARD adafruit_feather_rp2040_usb_host)
 
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
@@ -20,11 +21,10 @@ target_include_directories(${PROJECT} PRIVATE
 )
 
 add_subdirectory(${PICO_PIO_USB_DIR} pico_pio_usb)
+add_subdirectory(${PICO_LIBSDEMU_DIR} pico-libsdemu)
 
 # use tinyusb implementation
 target_compile_definitions(${PROJECT} PRIVATE PIO_USB_USE_TINYUSB)
-
-
 
 #pico_enable_stdio_usb(${PROJECT} 1)
 pico_enable_stdio_uart(${PROJECT} 1)
@@ -34,6 +34,7 @@ target_link_libraries(${PROJECT}
     pico_pio_usb
     tinyusb_host
     tinyusb_device
+    pico-libsdemu
 )
 
 pico_add_extra_outputs(${PROJECT})
