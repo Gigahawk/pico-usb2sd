@@ -25,7 +25,6 @@
 volatile uint8_t _connection_state = CONN_STATE_NO_CONN;
 volatile uint8_t _dev_addr = 0;
 volatile bool _disk_busy = false;
-uint8_t _sd_block_data[SD_SECTOR_SIZE];
 
 void core1_main()
 {
@@ -148,15 +147,13 @@ void printbuf(uint8_t buf[], size_t len)
   DEBUG_PRINTF("\n");
 }
 
-uint8_t* get_sd_block(uint32_t block_num, bool writable)
+bool read_sd_block(uint32_t block_num, uint8_t *buff)
 {
-    // TODO: support writing to drive?
-    (void)writable;
     _disk_busy = true;
     tuh_msc_read10(
         _dev_addr,
         0,
-        _sd_block_data,
+        buff,
         block_num,
         1,
         disk_io_complete,
@@ -165,5 +162,23 @@ uint8_t* get_sd_block(uint32_t block_num, bool writable)
     while(_disk_busy)
         tuh_task();
     //printbuf(_sd_block_data, SD_SECTOR_SIZE);
-    return _sd_block_data;
+    return true;
+}
+
+bool write_sd_block(uint32_t block_num, uint8_t *buff)
+{
+    _disk_busy = true;
+    tuh_msc_write10(
+        _dev_addr,
+        0,
+        buff,
+        block_num,
+        1,
+        disk_io_complete,
+        0
+    );
+    while(_disk_busy)
+        tuh_task();
+    //printbuf(_sd_block_data, SD_SECTOR_SIZE);
+    return true;
 }
